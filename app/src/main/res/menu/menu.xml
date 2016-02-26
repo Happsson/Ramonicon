@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".WifiActivity">
+    <item android:id="@+id/findDevices"
+        android:title="Find devices"
+        />
+    <item android:id="@+id/setAsMaster"
+        android:title="Set as master"
+        />
+</menu>

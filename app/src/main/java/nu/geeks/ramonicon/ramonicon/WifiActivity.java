@@ -6,7 +6,10 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,10 +17,7 @@ import android.widget.TextView;
 /**
  * Created by Hannes on 2016-02-26.
  */
-public class WifiActivity extends Activity {
-
-    Button testBt;
-    TextView tvMsg;
+public class WifiActivity extends AppCompatActivity {
 
     WifiP2pManager manager;
     WifiP2pManager.Channel channel;
@@ -31,10 +31,8 @@ public class WifiActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.game_screen);
 
-        testBt = (Button) findViewById(R.id.bTest);
-        tvMsg = (TextView) findViewById(R.id.tvMsg);
 
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
@@ -46,9 +44,26 @@ public class WifiActivity extends Activity {
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
-        testBt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id){
+
+            case R.id.findDevices:
                 manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
                     @Override
                     public void onSuccess() {
@@ -60,10 +75,14 @@ public class WifiActivity extends Activity {
                         Log.e(TAG, "Did not discover peers");
                     }
                 });
+                //HÄr muicke
+                break;
 
-            }
-        });
 
+        }
+
+
+        return true;
     }
 
     @Override
@@ -78,4 +97,6 @@ public class WifiActivity extends Activity {
         super.onPause();
         unregisterReceiver(bReceiver);
     }
+
+
 }

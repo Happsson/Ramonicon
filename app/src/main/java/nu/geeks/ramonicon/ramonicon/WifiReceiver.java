@@ -32,8 +32,6 @@ public class WifiReceiver extends BroadcastReceiver {
         this.manager = manager;
         this.channel = channel;
         this.myWifiActivity = myWifiActivity;
-
-
     }
 
 
@@ -43,7 +41,7 @@ public class WifiReceiver extends BroadcastReceiver {
         Log.e("WIFIACTIVITY", "onRecieve");
 
         String action = intent.getAction();
-        WifiP2pManager.PeerListListener peerListListener;
+
 
         if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             // Check to see if Wi-Fi is enabled and notify appropriate activity
