@@ -65,8 +65,6 @@ public class WifiReceiver extends BroadcastReceiver implements WifiP2pManager.Co
             if(manager != null){
                 manager.requestPeers(channel, new WifiP2pManager.PeerListListener() {
 
-
-
                     @Override
                     public void onPeersAvailable(WifiP2pDeviceList peers) {
                         //Clear device list
@@ -76,6 +74,8 @@ public class WifiReceiver extends BroadcastReceiver implements WifiP2pManager.Co
                         for(WifiP2pDevice dev : devices){
                             Log.e(TAG, dev.deviceName);
                         }
+
+
 
                         connect();
 
@@ -91,19 +91,24 @@ public class WifiReceiver extends BroadcastReceiver implements WifiP2pManager.Co
         }
     }
 
-public void connect(){
-    WifiP2pDevice device = devices.get(0);
+    public void connect(){
+        if(!devices.isEmpty()) {
+            WifiP2pDevice device = devices.get(0);
+            WifiP2pConfig config = new WifiP2pConfig();
+            config.deviceAddress = device.deviceAddress;
+            config.wps.setup = WpsInfo.PBC;
 
-    WifiP2pConfig config = new WifiP2pConfig();
-    config.deviceAddress = device.deviceAddress;
-    config.wps.setup = WpsInfo.PBC;
-    Log.e(TAG,"Connect()");
-    manager.connect(channel, config, this);
-}
+            Log.e(TAG, "Connect()");
+            manager.connect(channel, config, this);
+        }
+    }
 
     @Override
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         Log.e(TAG,"onConnectionInfoAvailable");
+        myWifiActivity.updateText("Group formed: "  + info.groupFormed);
+
+
         // InetAddress from WifiP2pInfo struct.
         String groupOwnerAddress = info.groupOwnerAddress.getHostAddress();
 
