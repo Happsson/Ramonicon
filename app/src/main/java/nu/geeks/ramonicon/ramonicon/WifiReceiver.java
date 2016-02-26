@@ -3,13 +3,19 @@ package nu.geeks.ramonicon.ramonicon;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WpsInfo;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.util.Log;
+import android.view.ViewDebug;
 import android.widget.Toast;
 
+import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -17,12 +23,12 @@ import java.util.List;
 /**
  * Created by Hannes on 2016-02-26.
  */
-public class WifiReceiver extends BroadcastReceiver {
+public class WifiReceiver extends BroadcastReceiver implements WifiP2pManager.ConnectionInfoListener, WifiP2pManager.ActionListener {
 
     private WifiP2pManager manager;
     private Channel channel;
     private WifiActivity myWifiActivity;
-    private Collection<WifiP2pDevice> devices;
+    private ArrayList<WifiP2pDevice> devices;
 
     final String TAG = "WIFIACTIVITY";
 
@@ -32,7 +38,9 @@ public class WifiReceiver extends BroadcastReceiver {
         this.manager = manager;
         this.channel = channel;
         this.myWifiActivity = myWifiActivity;
+        this.devices = new ArrayList<>();
     }
+
 
 
     @Override
@@ -56,13 +64,20 @@ public class WifiReceiver extends BroadcastReceiver {
             // Call WifiP2pManager.requestPeers() to get a list of current peersnew
             if(manager != null){
                 manager.requestPeers(channel, new WifiP2pManager.PeerListListener() {
+
+
+
                     @Override
                     public void onPeersAvailable(WifiP2pDeviceList peers) {
+                        //Clear device list
+                        devices.clear();
                         Log.e("WIFIACTIVITY", "peers avaliable");
-                        devices = peers.getDeviceList();
+                        devices.addAll(peers.getDeviceList());
                         for(WifiP2pDevice dev : devices){
                             Log.e(TAG, dev.deviceName);
                         }
+
+                        connect();
 
                     }
                 });
@@ -74,5 +89,45 @@ public class WifiReceiver extends BroadcastReceiver {
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             // Respond to this device's wifi state changing
         }
+    }
+
+public void connect(){
+    WifiP2pDevice device = devices.get(0);
+
+    WifiP2pConfig config = new WifiP2pConfig();
+    config.deviceAddress = device.deviceAddress;
+    config.wps.setup = WpsInfo.PBC;
+    Log.e(TAG,"Connect()");
+    manager.connect(channel, config, this);
+}
+
+    @Override
+    public void onConnectionInfoAvailable(WifiP2pInfo info) {
+        Log.e(TAG,"onConnectionInfoAvailable");
+        // InetAddress from WifiP2pInfo struct.
+        String groupOwnerAddress = info.groupOwnerAddress.getHostAddress();
+
+        // After the group negotiation, we can determine the group owner.
+        if (info.groupFormed && info.isGroupOwner) {
+            // Do whatever tasks are specific to the group owner.
+            // One common case is creating a server thread and accepting
+            // incoming connections.
+            Log.e(TAG,"Group Formed");
+        } else if (info.groupFormed) {
+            Log.e(TAG,"Group Joined");
+            // The other device acts as the client. In this case,
+            // you'll want to create a client thread that connects to the group
+            // owner.
+        }
+    }
+
+    @Override
+    public void onSuccess() {
+        Log.e(TAG,"onConnect Success");
+    }
+
+    @Override
+    public void onFailure(int i) {
+
     }
 }
